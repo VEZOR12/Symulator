@@ -98,13 +98,29 @@ types1 = (water, ground)
 # POKEMON2'S TYPES
 types2 = (fire, flying)
 
-# POKEMON1'S RESISTANCE
+# POKEMON1'S RESISTANCES
 resistance1 = {
     'normal': types1[0].normal_resistance * types1[1].normal_resistance,
     'fire': types1[0].fire_resistance * types1[1].fire_resistance,
+    'water': types1[0].water_resistance * types1[1].water_resistance,
+    'grass': types1[0].grass_resistance * types1[1].grass_resistance,
+    'electric': types1[0].electric_resistance * types1[1].electric_resistance,
+    'flying': types1[0].flying_resistance * types1[1].flying_resistance,
+    'psychic': types1[0].psychic_resistance * types1[1].psychic_resistance,
+    'poison': types1[0].poison_resistance * types1[1].poison_resistance,
+    'ghost': types1[0].ghost_resistance * types1[1].ghost_resistance,
+    'fighting': types1[0].fighting_resistance * types1[1].fighting_resistance,
+    'steel':types1[0].steel_resistance * types1[1].steel_resistance,
+    'ground': types1[0].ground_resistance * types1[1].ground_resistance,
+    'rock': types1[0].rock_resistance * types1[1].rock_resistance,
+    'ice': types1[0].ice_resistance * types1[1].ice_resistance,
+    'dark': types1[0].dark_resistance * types1[1].dark_resistance,
+    'bug': types1[0].bug_resistance * types1[1].bug_resistance,
+    'dragon': types1[0].dragon_resistance * types1[1].dragon_resistance,
+    'fairy': types1[0].fairy_resistance * types1[1].fairy_resistance,
 }
 
-# POKEMON2'S RESISTANCE
+# POKEMON2'S RESISTANCES
 resistance2 = {
     'normal': 0,
 }
@@ -112,8 +128,8 @@ resistance2 = {
 # POKEMON1'S ATTACKS
 attacks1 = [
     Move(power=40, accuracy=100, type='Fairy', category='Special', contact=False),
-    Move(power=0, accuracy=100, type='Normal', category='Status', contact=False),
-    Move(power=75, accuracy=100, type='Grass', category='Special', contact=False),
+    Move(power=0, accuracy=100, type='Water', category='Status', contact=False),
+    Move(power=75, accuracy=100, type='Ground', category='Special', contact=False),
     Move(power=70, accuracy=100, type='Bug', category='Physical', contact=True)
 ]
 # POKEMON2'S ATTACKS
@@ -158,18 +174,19 @@ def fight(pokemon1, pokemon2):
 
 
 def attack(attacker, defender, runda):
-    print(f"HP of defender: {defender.stats['hp']} ({defender.name})")
-    print(f"HP of attacker: {attacker.stats['hp']} ({attacker.name})")
+    # print(f"HP of defender: {defender.stats['hp']} ({defender.name})")
+    # print(f"HP of attacker: {attacker.stats['hp']} ({attacker.name})")
     # todo: chance of using attack based on accuracy
 
     if attacker.attacks[runda].category == 'Status':
-        print("Move's effect")
+        # print("Move's effect")
+        pass
     else:
         physical_factor = round(0.27 * (attacker.stats['att'] + 25) / (defender.stats['def'] + 25), 4)
         special_factor = round(0.27 * (attacker.stats['spatt'] + 25) / (defender.stats['spdef'] + 25), 4)
         power_factor = attacker.attacks[runda].power
 
-        if attacker.attacks[runda].type in attacker.types:
+        if attacker.attacks[runda].type == attacker.types[0].name or attacker.attacks[runda].type == attacker.types[1].name:
             power_factor = power_factor * 1.30
         if attacker.attacks[runda].category == 'Physical':
             stats_factor = physical_factor
@@ -192,8 +209,8 @@ def attack(attacker, defender, runda):
 
         defender.stats['hp'] = int(defender.stats['hp']) - int(damage)
 
-        print(f"{attacker.name} attacks as first dealing {int(damage)}")
-    print(f"{defender.name} ends up with {defender.stats['hp']} HP \n")
+        # print(f"{attacker.name} attacks as first dealing {int(damage)}")
+    # print(f"{defender.name} ends up with {defender.stats['hp']} HP \n")
 
     verifying_winner(attacker, defender)
 
