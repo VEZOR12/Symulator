@@ -32,9 +32,9 @@ class Pokemon:
         self.ability = ability
         # todo: resistances in this class
 
-    def get_type_resistance(self, type_name: str):
+    def get_type_resistance(self, type_name):
         if self.type2 is not None:
-            return self.type1.resistances[type_name] * self.type1.resistances[type_name]
+            return self.type1.resistances[type_name] * self.type2.resistances[type_name]
         else:
             return self.type1.resistances[type_name]
 
@@ -48,24 +48,24 @@ class Type:
                  dragon_resistance=1.0, fairy_resistance=1.0):
         self.name = name
         self.resistances = {
-            'normal_resistance': normal_resistance,
-            'fire_resistance': fire_resistance,
-            'water_resistance': water_resistance,
-            'grass_resistance': grass_resistance,
-            'electric_resistance': electric_resistance,
-            'flying_resistance': flying_resistance,
-            'psychic_resistance': psychic_resistance,
-            'poison_resistance': poison_resistance,
-            'ghost_resistance': ghost_resistance,
-            'fighting_resistance': fighting_resistance,
-            'steel_resistance': steel_resistance,
-            'ground_resistance': ground_resistance,
-            'rock_resistance': rock_resistance,
-            'ice_resistance': ice_resistance,
-            'dark_resistance': dark_resistance,
-            'bug_resistance': bug_resistance,
-            'dragon_resistance': dragon_resistance,
-            'fairy_resistance': fairy_resistance
+            'Normal': normal_resistance,
+            'Fire': fire_resistance,
+            'Water': water_resistance,
+            'Grass': grass_resistance,
+            'Electric': electric_resistance,
+            'Flying': flying_resistance,
+            'Psychic': psychic_resistance,
+            'Poison': poison_resistance,
+            'Ghost': ghost_resistance,
+            'Fighting': fighting_resistance,
+            'Steel': steel_resistance,
+            'Ground': ground_resistance,
+            'Rock': rock_resistance,
+            'Ice': ice_resistance,
+            'Dark': dark_resistance,
+            'Bug': bug_resistance,
+            'Dragon': dragon_resistance,
+            'Fairy': fairy_resistance
         }
 
 
@@ -109,17 +109,17 @@ fairy = Type(name='Fairy', dragon_resistance=0, fighting_resistance=0.5, dark_re
 
 # POKEMON1'S ATTACKS
 attacks1 = [
-    Move(power=1, accuracy=100, type=dark, category='Special', contact=False),
-    Move(power=1, accuracy=100, type=ghost, category='Special', contact=False),
-    Move(power=1, accuracy=100, type=water, category='Physical', contact=True),
-    Move(power=1, accuracy=100, type=water, category='Physical', contact=True, critical_chance=2)
+    Move(power=1, accuracy=100, type='Dark', category='Special', contact=False),
+    Move(power=1, accuracy=100, type='Ghost', category='Special', contact=False),
+    Move(power=1, accuracy=100, type='Ghost', category='Physical', contact=True),
+    Move(power=1, accuracy=100, type='Water', category='Physical', contact=True, critical_chance=2)
 ]
 # POKEMON2'S ATTACKS
 attacks2 = [
-    Move(power=1, accuracy=100, type=psychic, category='Status', contact=False),
-    Move(power=1, accuracy=100, type=flying, category='Special', contact=False),
-    Move(power=1, accuracy=100, type=flying, category='Special', contact=False),
-    Move(power=1, accuracy=100, type=flying, category='Special', contact=False, critical_chance=2)
+    Move(power=1, accuracy=100, type='Psychic', category='Special', contact=False),
+    Move(power=1, accuracy=100, type='Flying', category='Special', contact=False),
+    Move(power=1, accuracy=100, type='Flying', category='Special', contact=False),
+    Move(power=1, accuracy=100, type='Flying', category='Special', contact=False, critical_chance=2)
 ]
 
 
@@ -181,8 +181,8 @@ def attack(attacker, defender, runda):
         friend_guard_factor = 1
         friend_guard_factor = friend_guard(defender, friend_guard_factor)
 
-        effectiveness_factor = final_effectiveness(attacker, defender, runda)
-        print(f'Effectiveness of attack total {effectiveness_factor}')
+        effectiveness_factor = defender.get_type_resistance(attacker.attacks[runda].type)
+        print(f'Effectiveness of attack: {effectiveness_factor}')
         if effectiveness_factor == 0:
             print(f'{defender.name} is immune to this type of move')
         else:
