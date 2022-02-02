@@ -2,6 +2,11 @@ import time
 from random import randrange
 
 
+class Weather:
+    def __init__(self, name=None):
+        self.name = name
+
+
 class Move:
     def __init__(self, power=None, accuracy=None, type=None, category=None, contact=None, priority=0,
                  critical_chance=1):
@@ -16,14 +21,22 @@ class Move:
 
 
 class Pokemon:
-    def __init__(self, types: tuple, lvl: int, stats: dict, attacks: list, name=None, ability=None):
+    def __init__(self, lvl: int, stats: dict, attacks: list, type1=None, type2=None, name=None, ability=None):
         self.name = name
-        self.types = types
+        self.type1 = type1
+        self.type2 = type2
         self.lvl = lvl
         self.stats = stats
         self.attacks = attacks
         self.lvl_factor = round(0.9 + 0.1 * self.lvl + 0.0004 * self.lvl * self.lvl, 4)
         self.ability = ability
+        # todo: resistances in this class
+
+    def get_type_resistance(self, type_name: str):
+        if self.type2 is not None:
+            return self.type1.resistances[type_name] * self.type1.resistances[type_name]
+        else:
+            return self.type1.resistances[type_name]
 
 
 class Type:
@@ -34,24 +47,26 @@ class Type:
                  rock_resistance=1.0, ice_resistance=1.0, dark_resistance=1.0, bug_resistance=1.0,
                  dragon_resistance=1.0, fairy_resistance=1.0):
         self.name = name
-        self.normal_resistance = normal_resistance
-        self.fire_resistance = fire_resistance
-        self.water_resistance = water_resistance
-        self.grass_resistance = grass_resistance
-        self.electric_resistance = electric_resistance
-        self.flying_resistance = flying_resistance
-        self.psychic_resistance = psychic_resistance
-        self.poison_resistance = poison_resistance
-        self.ghost_resistance = ghost_resistance
-        self.fighting_resistance = fighting_resistance
-        self.steel_resistance = steel_resistance
-        self.ground_resistance = ground_resistance
-        self.rock_resistance = rock_resistance
-        self.ice_resistance = ice_resistance
-        self.dark_resistance = dark_resistance
-        self.bug_resistance = bug_resistance
-        self.dragon_resistance = dragon_resistance
-        self.fairy_resistance = fairy_resistance
+        self.resistances = {
+            'normal_resistance': normal_resistance,
+            'fire_resistance': fire_resistance,
+            'water_resistance': water_resistance,
+            'grass_resistance': grass_resistance,
+            'electric_resistance': electric_resistance,
+            'flying_resistance': flying_resistance,
+            'psychic_resistance': psychic_resistance,
+            'poison_resistance': poison_resistance,
+            'ghost_resistance': ghost_resistance,
+            'fighting_resistance': fighting_resistance,
+            'steel_resistance': steel_resistance,
+            'ground_resistance': ground_resistance,
+            'rock_resistance': rock_resistance,
+            'ice_resistance': ice_resistance,
+            'dark_resistance': dark_resistance,
+            'bug_resistance': bug_resistance,
+            'dragon_resistance': dragon_resistance,
+            'fairy_resistance': fairy_resistance
+        }
 
 
 normal = Type(name='Normal', fighting_resistance=2, ghost_resistance=0)
@@ -92,24 +107,19 @@ dragon = Type(name='Dragon', fire_resistance=0.5, water_resistance=0.5, grass_re
 fairy = Type(name='Fairy', dragon_resistance=0, fighting_resistance=0.5, dark_resistance=0.5, bug_resistance=0.5,
              poison_resistance=2, steel_resistance=2)
 
-# POKEMON1'S TYPES
-types1 = (water, ground)
-# POKEMON2'S TYPES
-types2 = (fire, flying)
-
 # POKEMON1'S ATTACKS
 attacks1 = [
-    Move(power=90, accuracy=100, type=water, category='Physical', contact=True),
-    Move(power=85, accuracy=100, type=water, category='Physical', contact=True),
-    Move(power=50, accuracy=100, type=water, category='Physical', contact=True),
-    Move(power=75, accuracy=100, type=water, category='Physical', contact=True, critical_chance=2)
+    Move(power=1, accuracy=100, type=dark, category='Special', contact=False),
+    Move(power=1, accuracy=100, type=ghost, category='Special', contact=False),
+    Move(power=1, accuracy=100, type=water, category='Physical', contact=True),
+    Move(power=1, accuracy=100, type=water, category='Physical', contact=True, critical_chance=2)
 ]
 # POKEMON2'S ATTACKS
 attacks2 = [
-    Move(power=90, accuracy=100, type=electric, category='Special', contact=False),
-    Move(power=110, accuracy=100, type=fire, category='Special', contact=False),
-    Move(power=95, accuracy=100, type=fire, category='Special', contact=False),
-    Move(power=60, accuracy=100, type=flying, category='Special', contact=False, critical_chance=2)
+    Move(power=1, accuracy=100, type=psychic, category='Status', contact=False),
+    Move(power=1, accuracy=100, type=flying, category='Special', contact=False),
+    Move(power=1, accuracy=100, type=flying, category='Special', contact=False),
+    Move(power=1, accuracy=100, type=flying, category='Special', contact=False, critical_chance=2)
 ]
 
 
@@ -158,7 +168,7 @@ def attack(attacker, defender, runda):
         special_factor = round(0.27 * (attacker.stats['spatt'] + 25) / (defender.stats['spdef'] + 25), 4)
         power_factor = attacker.attacks[runda].power
 
-        if attacker.attacks[runda].type in attacker.types:
+        if attacker.attacks[runda].type == attacker.type1 or attacker.attacks[runda].type == attacker.type2:
             power_factor = power_factor * 1.30
         if attacker.attacks[runda].category == 'Physical':
             stats_factor = physical_factor
@@ -166,7 +176,6 @@ def attack(attacker, defender, runda):
             stats_factor = special_factor
 
         # power_factor multiplied by items
-        # effectiveness
         # weather
 
         friend_guard_factor = 1
@@ -198,119 +207,6 @@ def friend_guard(defender, friend_guard_factor):
         return friend_guard_factor
     else:
         return friend_guard_factor
-
-
-def final_effectiveness(attacker, defender, runda):
-    if len(defender.types) == 2:
-        if attacker.attacks[runda].type == normal:
-            effectiveness_factor = defender.types[0].normal_resistance * defender.types[1].normal_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == fire:
-            effectiveness_factor = defender.types[0].fire_resistance * defender.types[1].fire_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == water:
-            effectiveness_factor = defender.types[0].water_resistance * defender.types[1].water_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == grass:
-            effectiveness_factor = defender.types[0].grass_resistance * defender.types[1].grass_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == electric:
-            effectiveness_factor = defender.types[0].electric_resistance * defender.types[1].electric_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == flying:
-            effectiveness_factor = defender.types[0].flying_resistance * defender.types[1].flying_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == psychic:
-            effectiveness_factor = defender.types[0].psychic_resistance * defender.types[1].psychic_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == poison:
-            effectiveness_factor = defender.types[0].poison_resistance * defender.types[1].poison_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == ghost:
-            effectiveness_factor = defender.types[0].ghost_resistance * defender.types[1].ghost_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == fighting:
-            effectiveness_factor = defender.types[0].fighting_resistance * defender.types[1].fighting_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == steel:
-            effectiveness_factor = defender.types[0].steel_resistance * defender.types[1].steel_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == rock:
-            effectiveness_factor = defender.types[0].rock_resistance * defender.types[1].rock_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == ground:
-            effectiveness_factor = defender.types[0].ground_resistance * defender.types[1].ground_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == ice:
-            effectiveness_factor = defender.types[0].ice_resistance * defender.types[1].ice_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == dark:
-            effectiveness_factor = defender.types[0].dark_resistance * defender.types[1].dark_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == bug:
-            effectiveness_factor = defender.types[0].bug_resistance * defender.types[1].bug_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == dragon:
-            effectiveness_factor = defender.types[0].dragon_resistance * defender.types[1].dragon_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == fairy:
-            effectiveness_factor = defender.types[0].fairy_resistance * defender.types[1].fairy_resistance
-            return effectiveness_factor
-    else:
-        if attacker.attacks[runda].type == normal:
-            effectiveness_factor = defender.types[0].normal_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == fire:
-            effectiveness_factor = defender.types[0].fire_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == water:
-            effectiveness_factor = defender.types[0].water_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == grass:
-            effectiveness_factor = defender.types[0].grass_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == electric:
-            effectiveness_factor = defender.types[0].electric_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == flying:
-            effectiveness_factor = defender.types[0].flying_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == psychic:
-            effectiveness_factor = defender.types[0].psychic_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == poison:
-            effectiveness_factor = defender.types[0].poison_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == ghost:
-            effectiveness_factor = defender.types[0].ghost_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == fighting:
-            effectiveness_factor = defender.types[0].fighting_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == steel:
-            effectiveness_factor = defender.types[0].steel_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == rock:
-            effectiveness_factor = defender.types[0].rock_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == ground:
-            effectiveness_factor = defender.types[0].ground_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == ice:
-            effectiveness_factor = defender.types[0].ice_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == dark:
-            effectiveness_factor = defender.types[0].dark_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == bug:
-            effectiveness_factor = defender.types[0].bug_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == dragon:
-            effectiveness_factor = defender.types[0].dragon_resistance
-            return effectiveness_factor
-        elif attacker.attacks[runda].type == fairy:
-            effectiveness_factor = defender.types[0].fairy_resistance
-            return effectiveness_factor
 
 
 def randomised_damage(damage):
@@ -357,29 +253,30 @@ tic = time.perf_counter()
 for i in range(1):
     # POKEMON1'S STATS
     stats1 = {
-        'att': 4500,
-        'def': 2000,
-        'spatt': 2000,
-        'spdef': 2000,
-        'spd': 2000,
-        'hp': 9000,
+        'att': 385,
+        'def': 671,
+        'spatt': 1879,
+        'spdef': 686,
+        'spd': 897,
+        'hp': 3575,
         'pokemon_accuracy': 100,
         'pokemon_dodge': 100,
     }
     # POKEMON2'S STATS
     stats2 = {
-        'att': 2000,
-        'def': 2000,
-        'spatt': 4500,
-        'spdef': 2000,
-        'spd': 2000,
-        'hp': 9000,
+        'att': 268,
+        'def': 542,
+        'spatt': 698,
+        'spdef': 683,
+        'spd': 453,
+        'hp': 1090,
         'pokemon_accuracy': 100,
         'pokemon_dodge': 100,
     }
-    pokemon1 = Pokemon(types=types1, lvl=75, stats=stats1, attacks=attacks1, name=f'Swampert_{i}', ability='Leaf Guard')
-    pokemon2 = Pokemon(types=types2, lvl=66, stats=stats2, attacks=attacks2, name=f'Charizard_{i}', ability='Speed Boost')
-
+    pokemon1 = Pokemon(type1=ghost, type2=poison, lvl=60, stats=stats1, attacks=attacks1, name=f'Gengar_{i}',
+                       ability='Cursed Body')
+    pokemon2 = Pokemon(type1=psychic, type2=fairy, lvl=57, stats=stats2, attacks=attacks2, name=f'Gardevoir_{i}',
+                       ability='Trace')
     fight(pokemon_1=pokemon1, pokemon_2=pokemon2)
 
 toc = time.perf_counter()
